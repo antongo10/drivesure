@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  policies  Policy[]
+}
+
+model Policy {
+  id               String   @id @default(cuid())
+  policyNumber     String   @unique
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  status           String   @default("active")
+  startDate        DateTime
+  endDate          DateTime
+  coverType        String
+  annualPremium    Float
+  monthlyPremium   Float
+  paymentFrequency String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  vehicle          Vehicle?
+  drivers          Driver[]
+  address          Address?
+  payment          Payment?
+}
+
+model Vehicle {
+  id           String @id @default(cuid())
+  policyId     String @unique
+  policy       Policy @relation(fields: [policyId], references: [id])
+  registration String
+  make         String
+  model        String
+  year         Int
+  engineSize   String
+  fuelType     String
+  bodyType     String
+  value        Int
+  mileage      Int
+}
+
+model Driver {
+  id            String   @id @default(cuid())
+  policyId      String
+  policy        Policy   @relation(fields: [policyId], references: [id])
+  isMainDriver  Boolean  @default(false)
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime
+  licenceNumber String
+  licenceType   String
+  licenceYears  Int
+  ncbYears      Int
+  occupation    String
+  claimsHistory Int      @default(0)
+  convictions   Int      @default(0)
+}
+
+model Address {
+  id       String  @id @default(cuid())
+  policyId String  @unique
+  policy   Policy  @relation(fields: [policyId], references: [id])
+  line1    String
+  line2    String?
+  city     String
+  county   String?
+  postcode String
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  policyId      String   @unique
+  policy        Policy   @relation(fields: [policyId], references: [id])
+  cardLast4     String
+  cardBrand     String
+  billingName   String
+  amount        Float
+  paidAt        DateTime @default(now())
+  transactionId String   @unique
+}
